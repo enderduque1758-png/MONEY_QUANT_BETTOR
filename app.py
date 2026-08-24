@@ -1,133 +1,185 @@
-import streamlit as st
+import json
+import math
+from datetime import datetime
+
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import requests
+import streamlit as st
 
-st.title("🏆 Panel IA + Casas de Apuestas")
-st.subheader("Dashboard Multi‑Mercado con Value Bets")
+from services import (
+    ai_validate,
+    extract_bookmaker_odds,
+    football_fixture,
+    football_fixture_players,
+    football_h2h,
+    get_odds,
+    get_sports,
+    odds_api_key,
+)
 
-# ---------------------------
-# Funciones para APIs (ejemplo)
-# ---------------------------
-def obtener_cuotas_betfair(market_id):
-    url = "https://api.betfair.com/exchange/betting/rest/v1.0/listMarketBook/"
-    headers = {"X-Application": "YOUR_APP_KEY", "X-Authentication": "YOUR_SESSION_TOKEN"}
-    payload = {"marketIds": [market_id], "priceProjection": {"priceData": ["EX_BEST_OFFERS"]}}
-    r = requests.post(url, headers=headers, json=payload)
-    return r.json() if r.status_code == 200 else None
+st.set_page_config(page_title="MONEY QUANT BETTOR", page_icon="🏆", layout="wide")
 
-def obtener_cuotas_bet365(event_id):
-    url = f"https://api.bet365.com/v1/event/{event_id}/odds"
-    headers = {"Authorization": "Bearer YOUR_TOKEN"}
-    r = requests.get(url, headers=headers)
-    return r.json() if r.status_code == 200 else None
+st.title("🏆 MONEY QUANT BETTOR")
+st.caption("Motor cuantitativo: cuotas + H2H + estadísticas + enfrentamientos + validación IA")
 
-def obtener_cuotas_pinnacle(sport_id, league_id):
-    url = f"https://api.pinnacle.com/v1/odds?sportId={sport_id}&leagueId={league_id}"
-    headers = {"Authorization": "Basic YOUR_API_KEY"}
-    r = requests.get(url, headers=headers)
-    return r.json() if r.status_code == 200 else None
+with st.sidebar:
+    st.header("⚙️ Configuración")
+    sports = get_sports() if odds_api_key() else []
+    sport_options = {s.get("title", s.get("key")): s.get("key") for s in sports}
+    if not sport_options:
+        sport_options = {
+            "Fútbol": "soccer_epl",
+            "NBA": "basketball_nba",
+            "MLB": "baseball_mlb",
+            "Tenis ATP/WTA": "tennis_atp",
+        }
+    sport_label = st.selectbox("Deporte", list(sport_options.keys()))
+    sport_key = sport_options[sport_label]
+    regions = st.multiselect("Regiones de cuotas", ["us", "eu", "uk", "au"], ["us", "eu"])
+    limit = st.slider("Partidos a mostrar", 5, 50, 15)
+    st.info("Configura ODDS_API_KEY, API_FOOTBALL_KEY y OPENAI_API_KEY como Secrets/variables de entorno. Nunca publiques las claves en GitHub.")
 
-# ---------------------------
-# Datos de ejemplo (simulados)
-# ---------------------------
-mercados = {
-    "OVER 2.5": {"cuota": 1.85, "prob_ia": 0.61},
-    "UNDER 2.5": {"cuota": 1.90, "prob_ia": 0.39},
-    "BTTS": {"cuota": 1.75, "prob_ia": 0.62},
-    "Chelsea Gana": {"cuota": 2.20, "prob_ia": 0.45},
-    "Fulham Gana": {"cuota": 3.00, "prob_ia": 0.35},
-    "Hándicap Asiático -1.5 Chelsea": {"cuota": 2.50, "prob_ia": 0.42},
-    "Corners +10.5": {"cuota": 1.95, "prob_ia": 0.55},
-    "Tarjetas +4.5": {"cuota": 2.10, "prob_ia": 0.48}
+
+def implied_probability(odds):
+    try:
+        return 1 / float(odds) if float(odds) > 1 else None
+    except (TypeError, ValueError, ZeroDivisionError):
+        return None
+
+
+def fair_odds(prob):
+    return 1 / prob if prob and prob > 0 else None
+
+
+def h2h_summary(h2h):
+    rows = []
+    for item in h2h:
+        teams = item.get("teams", {})
+        goals = item.get("goals", {})
+        rows.append({
+            "Fecha": item.get("fixture", {}).get("date"),
+            "Local": teams.get("home", {}).get("name"),
+            "Visitante": teams.get("away", {}).get("name"),
+            "Marcador": f"{goals.get('home', '-')}-{goals.get('away', '-')}",
+        })
+    return pd.DataFrame(rows)
+
+
+def calculate_score(odds, model_prob=None):
+    imp = implied_probability(odds)
+    if imp is None:
+        return None
+    if model_prob is None:
+        return {"prob": imp, "fair": fair_odds(imp), "edge": 0}
+    edge = model_prob - imp
+    return {"prob": model_prob, "fair": fair_odds(model_prob), "edge": edge}
+
+# --------------------
+# Partidos y cuotas
+# --------------------
+if st.button("🔄 Actualizar partidos y cuotas", type="primary"):
+    st.cache_data.clear()
+
+@st.cache_data(ttl=60)
+def load_odds(key, reg):
+    return get_odds(key, ",".join(reg))
+
+events = load_odds(sport_key, regions) if odds_api_key() else []
+rows = extract_bookmaker_odds(events)
+
+if not rows:
+    st.warning("No hay cuotas de Betano/RushBet disponibles con la configuración actual. El panel queda listo para mostrar los datos cuando la API/proveedor los entregue.")
+else:
+    odds_df = pd.DataFrame(rows)
+    event_keys = odds_df[["event_id", "home", "away", "start"]].drop_duplicates().head(limit)
+    st.subheader(f"📅 Partidos — {sport_label}")
+    st.dataframe(event_keys, use_container_width=True, hide_index=True)
+
+    st.subheader("💰 Comparador Betano vs RushBet")
+    pivot = odds_df.pivot_table(index=["event_id", "home", "away", "market", "selection", "point"], columns="bookmaker", values="odds", aggfunc="max").reset_index()
+    if "Betano" not in pivot.columns and "RushBet" not in pivot.columns:
+        st.info("El proveedor no devolvió todavía nombres de bookmaker compatibles. Revisa la cobertura de tu proveedor de cuotas.")
+    else:
+        for col in ["Betano", "RushBet"]:
+            if col not in pivot.columns:
+                pivot[col] = float("nan")
+        pivot["Mejor cuota"] = pivot[["Betano", "RushBet"]].max(axis=1, skipna=True)
+        pivot["Prob. implícita"] = pivot["Mejor cuota"].apply(implied_probability)
+        st.dataframe(pivot.sort_values("Mejor cuota", ascending=False), use_container_width=True, hide_index=True)
+
+# --------------------
+# Explorador de partido
+# --------------------
+st.divider()
+st.header("🔎 Análisis profundo de un partido")
+
+if rows:
+    event_df = pd.DataFrame(rows)[["event_id", "home", "away", "start"]].drop_duplicates()
+    labels = {f"{r.home} vs {r.away} — {r.start}": r.event_id for r in event_df.itertuples()}
+    selected_label = st.selectbox("Selecciona el partido", list(labels))
+    event_id = labels[selected_label]
+    selected_event = next((e for e in events if e.get("id") == event_id), {})
+else:
+    st.info("Carga cuotas para seleccionar un partido real.")
+    selected_event = {}
+
+c1, c2, c3 = st.columns(3)
+with c1:
+    st.metric("Local", selected_event.get("home_team", "—"))
+with c2:
+    st.metric("Visitante", selected_event.get("away_team", "—"))
+with c3:
+    st.metric("Inicio", selected_event.get("commence_time", "—"))
+
+# H2H solo cuando tenemos IDs de API-Football configurados y el deporte es fútbol.
+if sport_key.startswith("soccer_") and selected_event and st.button("📊 Cargar H2H / enfrentamientos"):
+    st.warning("Para H2H de fútbol se necesita API-Football y los IDs de sus equipos. El proveedor de cuotas no siempre comparte esos IDs.")
+    st.caption("Puedes introducir los IDs de API-Football para enlazar el partido con su histórico H2H.")
+    a, b = st.columns(2)
+    team_a = a.number_input("ID equipo local API-Football", min_value=0, step=1)
+    team_b = b.number_input("ID equipo visitante API-Football", min_value=0, step=1)
+    if team_a and team_b:
+        h2h = football_h2h(int(team_a), int(team_b), 10)
+        df_h2h = h2h_summary(h2h)
+        if not df_h2h.empty:
+            st.dataframe(df_h2h, use_container_width=True, hide_index=True)
+            scores = []
+            for x in h2h:
+                g = x.get("goals", {})
+                if isinstance(g.get("home"), int) and isinstance(g.get("away"), int):
+                    scores.append(g["home"] + g["away"])
+            if scores:
+                st.metric("Promedio exacto de goles H2H", f"{sum(scores) / len(scores):.2f}")
+        else:
+            st.info("No se encontraron H2H.")
+
+# --------------------
+# IA
+# --------------------
+st.divider()
+st.header("🤖 Validación IA")
+
+ai_payload = {
+    "sport": sport_label,
+    "event": {
+        "home": selected_event.get("home_team"),
+        "away": selected_event.get("away_team"),
+        "start": selected_event.get("commence_time"),
+    },
+    "odds": extract_bookmaker_odds([selected_event]) if selected_event else [],
+    "method": "Validar solamente datos suministrados; no inventar estadísticas.",
 }
 
-# ---------------------------
-# Función para ranking
-# ---------------------------
-def generar_ranking(mercados, filtro=None):
-    ranking = []
-    for mercado, datos in mercados.items():
-        if filtro and filtro not in mercado:
-            continue
-        cuota = datos["cuota"]
-        prob_ia = datos["prob_ia"]
-        prob_imp = 1 / cuota
-        diferencia = prob_ia - prob_imp
-        ranking.append({"Mercado": mercado, "Prob IA": prob_ia, "Prob Implícita": prob_imp, "Diferencia": diferencia})
-    return pd.DataFrame(ranking).sort_values(by="Diferencia", ascending=False).head(5)
+if st.button("🧠 Validar proyección más probable con IA", type="primary"):
+    with st.spinner("Analizando cuotas, mercado y datos disponibles..."):
+        try:
+            result = ai_validate(ai_payload)
+            if result.get("ok"):
+                st.success("Validación IA completada")
+                st.code(result.get("text", ""), language="json")
+            else:
+                st.error(result.get("error", "Error de IA"))
+        except Exception as exc:
+            st.error(f"No fue posible validar con IA: {exc}")
 
-# ---------------------------
-# Tabs principales
-# ---------------------------
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
-    "Populares", "Más/Menos", "BTTS", "Hándicap Asiático", 
-    "Corners", "Tarjetas", "Especiales"
-])
-
-# Populares
-with tab1:
-    st.write("📊 Top Value Bets Populares")
-    df_pop = generar_ranking(mercados)
-    st.dataframe(df_pop)
-    fig, ax = plt.subplots()
-    sns.barplot(data=df_pop, x="Mercado", y="Diferencia", palette="coolwarm", ax=ax)
-    plt.xticks(rotation=45)
-    st.pyplot(fig)
-
-# Más/Menos
-with tab2:
-    st.write("📊 Over/Under")
-    df_ou = generar_ranking(mercados, filtro="OVER")
-    st.dataframe(df_ou)
-
-# BTTS
-with tab3:
-    st.write("📊 Ambos Marcan (BTTS)")
-    df_btts = generar_ranking(mercados, filtro="BTTS")
-    st.dataframe(df_btts)
-
-# Hándicap Asiático
-with tab4:
-    st.write("📊 Hándicap Asiático")
-    df_handicap = generar_ranking(mercados, filtro="Hándicap")
-    st.dataframe(df_handicap)
-
-# Corners
-with tab5:
-    st.write("📊 Tiros de Esquina")
-    df_corners = generar_ranking(mercados, filtro="Corners")
-    st.dataframe(df_corners)
-
-# Tarjetas
-with tab6:
-    st.write("📊 Tarjetas")
-    df_cards = generar_ranking(mercados, filtro="Tarjetas")
-    st.dataframe(df_cards)
-
-# Especiales
-with tab7:
-    st.write("📊 Especiales")
-    df_specials = generar_ranking(mercados, filtro="Especiales")
-    st.dataframe(df_specials)
-
-# ---------------------------
-# Gráfico comparativo IA vs Casas
-# ---------------------------
-st.subheader("🏅 Comparación IA vs Casas de Apuestas")
-mercado = "OVER 2.5"
-prob_ia = 0.61
-cuotas = {"Betfair": 1.85, "Bet365": 1.80, "Pinnacle": 1.88}
-prob_imp = {casa: 1/cuota for casa, cuota in cuotas.items()}
-
-df_comp = pd.DataFrame({
-    "Fuente": ["IA"] + list(prob_imp.keys()),
-    "Probabilidad": [prob_ia] + list(prob_imp.values())
-})
-
-fig, ax = plt.subplots(figsize=(7,5))
-sns.barplot(data=df_comp, x="Fuente", y="Probabilidad", palette="viridis", ax=ax)
-ax.set_title(f"Comparación Prob IA vs Casas de Apuestas ({mercado})")
-ax.set_ylabel("Probabilidad")
-st.pyplot(fig)
+st.divider()
+st.caption("⚠️ Las probabilidades son estimaciones estadísticas, no garantías. Verifica reglas, disponibilidad de mercados y cobertura de cada proveedor antes de apostar.")
