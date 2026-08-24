@@ -6,14 +6,32 @@ import math
 from typing import Any, Dict, List, Optional
 import requests
 
+try:
+    import streamlit as st
+except Exception:
+    st = None
+
 TIMEOUT = 20
 
 def _get(url, params=None, headers=None):
     r=requests.get(url,params=params,headers=headers,timeout=TIMEOUT); r.raise_for_status(); return r.json()
 
-def odds_api_key(): return os.getenv("ODDS_API_KEY","").strip()
-def football_api_key(): return os.getenv("API_FOOTBALL_KEY","").strip()
-def sports_api_key(): return os.getenv("SPORTS_API_KEY","").strip()
+def _secret(name, default=""):
+    value=os.getenv(name,"").strip()
+    if value:
+        return value
+    try:
+        if st is not None and name in st.secrets:
+            return str(st.secrets[name]).strip()
+    except Exception:
+        pass
+    return default
+
+def odds_api_key(): return _secret("ODDS_API_KEY")
+def football_api_key(): return _secret("API_FOOTBALL_KEY")
+def sports_api_key(): return _secret("SPORTS_API_KEY")
+def openai_api_key(): return _secret("OPENAI_API_KEY")
+def openai_model(): return _secret("OPENAI_MODEL", "gpt-5.6-luna")
 
 def get_sports():
     k=odds_api_key(); return _get("https://api.the-odds-api.com/v4/sports/",{"apiKey":k}) if k else []
@@ -54,7 +72,6 @@ def football_fixture_enrichment(home,away):
     hi,ai=h["team"]["id"],a["team"]["id"]
     return {"ok":True,"teams":{"home":h["team"],"away":a["team"]},"h2h":football_h2h(hi,ai),"home_last":football_team_last(hi),"away_last":football_team_last(ai)}
 
-# ---------------- Normalized statistical engines ----------------
 def projection_from_samples(samples):
     x=[float(v) for v in samples if v is not None and float(v)>=0]
     if not x:return {"mean":0.,"median":0.,"stdev":0.,"count":0}
@@ -84,7 +101,6 @@ def tennis_projection(player_a,player_b):
     return {"player_a_score":sa,"player_b_score":sb,"p_a":pa,"p_b":1-pa,"samples_a":a,"samples_b":b}
 def tennis_market_probs(projection): return {"player_a":projection["p_a"],"player_b":projection["p_b"]}
 
-# ---------------- API-Sports automatic adapters ----------------
 SPORT_BASES={"baseball":"https://v1.baseball.api-sports.io","basketball":"https://v1.basketball.api-sports.io","nba":"https://v1.basketball.api-sports.io","tennis":"https://v1.tennis.api-sports.io"}
 def sports_get(sport,endpoint,params=None):
     k=sports_api_key(); base=SPORT_BASES.get(sport,sport if str(sport).startswith("http") else None)
@@ -137,7 +153,8 @@ def normalized_history_samples(enrichment):
     out={"home_scored":[],"home_allowed":[],"away_scored":[],"away_allowed":[],"h2h_total":[]}
     for key,prefix in (("home","home"),("away","away")):
         for g in enrichment.get(key,{}).get("games",[]):
-            if g["home"].lower()==enrichment[key]["team"].get("name","").lower(): scored,allowed=g["home_score"],g["away_score"]
+            team_name=enrichment[key]["team"].get("name","").lower()
+            if (g.get("home") or "").lower()==team_name: scored,allowed=g["home_score"],g["away_score"]
             else: scored,allowed=g["away_score"],g["home_score"]
             out[f"{prefix}_scored"].append(scored); out[f"{prefix}_allowed"].append(allowed)
     return out
@@ -150,10 +167,8 @@ def auto_projection_for_event(sport,home,away):
     else: p=basketball_projection(x["home_scored"],x["away_scored"])
     e["samples"]=x; e["projection"]=p; return e
 
-# ---------------- AI validator ----------------
 def ai_validate(payload):
-    k=os.getenv("OPENAI_API_KEY","").strip(); model=os.getenv("OPENAI_MODEL","").strip()
-    if not k:return {"ok":False,"error":"OPENAI_API_KEY no configurada"}
-    if not model:return {"ok":False,"error":"OPENAI_MODEL no configurada"}
+    k=openai_api_key(); model=openai_model()
+    if not k:return {"ok":False,"error":"OPENAI_API_KEY no configurada en Streamlit Secrets o variables de entorno"}
     prompt="""Eres un validador cuantitativo deportivo. Usa SOLO los datos recibidos. No inventes estadísticas, lesiones, pitchers, jugadores, H2H ni cuotas. Compara la proyección con las cuotas y devuelve JSON: recomendacion_principal, opciones_opcionales (máximo 5), probabilidad_modelo, probabilidad_ia, confianza, cuota_justa, mejor_cuota, edge, expected_value, razonamiento, riesgos, calidad_datos. Si faltan datos críticos o EV <= 0 para todas las opciones, usa SIN APUESTA. La IA puede validar pero no sustituye los cálculos matemáticos."""
     r=requests.post("https://api.openai.com/v1/responses",headers={"Authorization":f"Bearer {k}","Content-Type":"application/json"},json={"model":model,"input":prompt+"\nDATOS:\n"+json.dumps(payload,ensure_ascii=False)},timeout=45); r.raise_for_status(); d=r.json(); return {"ok":True,"text":d.get("output_text","")}
