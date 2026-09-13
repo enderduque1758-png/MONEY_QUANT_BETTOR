@@ -3,43 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#020b10">
 <title>MONEY QUANT BETTOR</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700&family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet">
 <link rel="stylesheet" href="./src/styles.css">
 <link rel="stylesheet" href="./src/sportsbook.css">
 </head>
 <body>
 <div id="app">
 <div class="app">
-<header class="top"><div class="logo">MQ</div><div class="brand"><b>MONEY QUANT BETTOR</b><small>DATOS. MODELOS. APUESTAS INTELIGENTES.</small></div><span class="header-live"><i></i> En vivo</span><div class="header-credit"><small>Créditos</small><b id="quota">—</b></div><div class="actions"><button class="btn api-button" id="settingsBtn" aria-label="Configurar API">API</button><button class="btn primary calendar-button" id="syncBtn">Consultar calendario</button></div></header>
-<nav class="sport-rail" aria-label="Filtrar por deporte"><button class="on" data-family="all">Todos</button><button data-family="soccer">Fútbol</button><button data-family="basketball">Básquet</button><button data-family="tennis">Tenis</button><button data-family="baseball">Béisbol</button></nav>
-<div class="signal-bar refresh-strip"><span class="signal-live"><i></i><b id="refreshAge">Sin sincronizar</b></span><span id="nextRefresh">Actualización inteligente activa</span><span id="cacheState">Caché optimizada</span><strong>AHORRO DE CRÉDITOS</strong></div>
+<header class="top">
+  <div class="logo">MQ</div>
+  <div class="brand"><b>MONEY QUANT BETTOR</b><small>DATOS. MODELOS. APUESTAS INTELIGENTES.</small></div>
+  <span class="header-live"><i></i> En vivo</span>
+  <div class="header-credit"><small>Créditos</small><b id="quota">—</b></div>
+  <div class="actions"><button class="btn api-button" id="settingsBtn" aria-label="Configurar API"><span class="material-symbols-outlined">settings</span><b>API</b></button><button class="btn primary calendar-button" id="syncBtn">Consultar calendario</button></div>
+</header>
+<nav class="sport-rail" aria-label="Filtrar por deporte">
+  <button class="on" data-family="all"><span class="material-symbols-outlined">apps</span><b>Todos</b></button>
+  <button data-family="soccer"><span class="material-symbols-outlined">sports_soccer</span><b>Fútbol</b></button>
+  <button data-family="tennis"><span class="material-symbols-outlined">sports_tennis</span><b>Tenis</b></button>
+  <button data-family="basketball"><span class="material-symbols-outlined">sports_basketball</span><b>NBA</b></button>
+  <button data-family="baseball"><span class="material-symbols-outlined">sports_baseball</span><b>MLB</b></button>
+  <button data-family="other"><span class="material-symbols-outlined">more_horiz</span><b>Más</b></button>
+</nav>
+<div class="signal-bar refresh-strip">
+  <span class="refresh-icon material-symbols-outlined">sync</span>
+  <span class="signal-live"><b id="refreshAge">Cuotas sin sincronizar</b></span>
+  <span id="nextRefresh">Actualización inteligente activa</span>
+  <span id="cacheState">Modo ahorro · 60 min</span>
+  <strong><span class="material-symbols-outlined">signal_cellular_alt</span><em>AHORRO ACTIVO</em></strong>
+</div>
 <div class="layout">
-<aside class="side">
-<button class="filter-toggle" id="filterToggle" type="button">Configuración de consulta <span>+</span></button>
-<p class="eyebrow">Calendario y ciclo de seguimiento</p>
-<div class="markets"><div class="field"><label>Desde</label><input class="input" id="dateFrom" type="date"></div><div class="field"><label>Hasta</label><input class="input" id="dateTo" type="date"></div></div>
-<div class="field"><label>Región de casas</label><select class="select" id="region"><option value="eu">Europa</option><option value="uk">Reino Unido</option><option value="us">Estados Unidos</option><option value="au">Australia</option></select></div>
-<div class="field"><label>Competiciones activas <span id="sportCount">0</span></label><div class="sports" id="sports"><p class="hint" style="padding:8px">Cargando catálogo.</p></div></div>
-<div class="field"><label>Mercados principales</label><div class="markets"><label class="market"><input type="checkbox" value="h2h" checked>Ganador</label><label class="market"><input type="checkbox" value="totals" checked>Totales</label><label class="market"><input type="checkbox" value="spreads">Hándicap</label><label class="market"><input type="checkbox" value="outrights">Futuros</label></div><p class="hint">Los mercados avanzados se consultan manualmente por evento para no gastar créditos innecesarios.</p></div>
-<div class="save">Actualización adaptativa: 15 min en vivo · 20 min si inicia pronto · 60 min en modo ahorro.</div>
-</aside>
 <main class="main">
-<section class="command console-v3"><div><span class="command-kicker">SPORTSBOOK QUANT · MERCADO EN VIVO</span><h1>CUOTAS, VALOR Y STAKE EN UNA SOLA VISTA</h1><p>Compara casas, detecta edge positivo y revisa confianza proyectada antes de construir tu combinada.</p></div><div class="command-side"><span class="live-pill">LIVE ODDS</span><div class="command-note">ODDS → EDGE → KELLY</div></div></section>
-<section class="metrics"><div class="card metric"><small>Eventos</small><b id="mEvents">0</b></div><div class="card metric"><small>Mercados</small><b id="mMarkets">0</b></div><div class="card metric"><small>Casas</small><b id="mBooks">0</b></div><div class="card metric"><small>Valor +5%</small><b id="mEdges">0</b></div><div class="card metric"><small>Acierto motor</small><b id="mHit">—</b></div></section>
-<section class="backtest-strip" id="backtestStrip"><div class="backtest-title"><strong>VALIDACIÓN WALK-FORWARD</strong><small>Solo resultados anteriores · sin fuga de información</small></div><div class="backtest-kpis"><div><small>Muestra</small><b id="wfSamples">—</b></div><div><small>Brier WF</small><b id="wfBrier">—</b></div><div><small>ROI plano</small><b id="wfRoi">—</b></div><div><small>Mejor mercado</small><b id="wfBest">—</b></div></div><div class="market-backtest" id="marketBacktest"><span>Esperando pronósticos liquidados.</span></div></section>
-<section class="risk-strip" id="riskStrip"><div class="risk-head"><div><strong>RISK DESK · BANKROLL</strong><small>Kelly ¼ + límites de exposición posteriores al cálculo</small></div><span id="riskState">Sin picks asignados</span></div><div class="risk-controls"><label>Bankroll <input id="riskBankroll" type="number" min="1" step="1" value="100"></label><label>Máx. partido % <input id="riskEventCap" type="number" min="1" max="30" step="1" value="6"></label><label>Máx. equipo % <input id="riskTeamCap" type="number" min="1" max="40" step="1" value="10"></label><label>Máx. deporte % <input id="riskSportCap" type="number" min="1" max="60" step="1" value="25"></label></div><div class="risk-summary" id="riskSummary"><span>Configura tu bankroll para calcular stake efectivo y concentración.</span></div></section>
-<section class="alerts-strip" id="alertsPanel"><div class="alerts-head"><div><strong>PRE-MATCH ALERTS</strong><small>Alineaciones · bajas · cambio de estado · movimiento de mercado</small></div><button class="btn alerts-clear" type="button" data-clear-alerts="1">Limpiar</button></div><div class="alerts-feed" id="alertFeed"><span class="alerts-empty">Sin cambios críticos detectados.</span></div></section>
-<div class="status"><i class="dot" id="dot"></i><span id="status">Sin sincronizar</span><span class="support-pill" id="betanoStatus">Betano apoyo: en espera</span></div>
-<div class="error" id="error"></div><div class="load" id="load"></div>
-<nav class="tabs"><button class="tab on" data-tab="events">Partidos y cuotas</button><button class="tab" data-tab="markets">Mercados</button><button class="tab" data-tab="performance">Rendimiento</button><button class="tab" data-tab="bombs">Bombas Stake</button><button class="tab" data-tab="slips">6 bandejas</button><button class="tab new-tab player-tab" data-tab="playercombo">🎯 Combinada jugadores <span>NUEVO</span></button><button class="tab new-tab unique-tab" data-tab="unique">🎲 Combinadas únicas <span>NUEVO</span></button><button class="tab" data-tab="long">Largas 15–30</button></nav>
-<div class="tools"><button class="btn" id="shuffleBtn" type="button">↻ Barajar combinadas</button><input class="input" id="search" placeholder="Buscar equipo o competición"><select class="select" id="filter" style="max-width:185px"><option value="all">Todos</option><option value="live">En vivo</option><option value="soon">Próximas 24 h</option></select></div>
-<section id="content"><div class="card empty console-empty"><div class="orb">LIVE</div><h2>SPORTSBOOK QUANT</h2><p>Selecciona competiciones y pulsa Actualizar para cargar cuotas, señales y combinadas.</p><small>La caché inteligente evita llamadas repetidas y conserva el último análisis en este dispositivo.</small></div></section>
-</main></div></div>
+  <section class="feed-nav">
+    <div class="feed-tabs" role="group" aria-label="Vista de partidos">
+      <button class="on" type="button" data-feed-filter="all"><i></i> TODOS <span id="feedCount">0</span></button>
+      <button type="button" data-feed-filter="live">EN VIVO</button>
+      <button type="button" data-feed-filter="soon">PRÓXIMOS</button>
+    </div>
+    <select class="select compact-select" id="filter" aria-label="Filtrar horario"><option value="all">Todos</option><option value="live">En vivo</option><option value="soon">Próximas 24 h</option></select>
+  </section>
+  <div class="status"><i class="dot" id="dot"></i><span id="status">Sin sincronizar</span><span class="support-pill" id="betanoStatus">Betano apoyo: en espera</span></div>
+  <div class="error" id="error"></div><div class="load" id="load"></div>
+  <div class="tools"><button class="btn" id="shuffleBtn" type="button"><span class="material-symbols-outlined">shuffle</span> Barajar</button><input class="input" id="search" placeholder="Buscar equipo o competición"></div>
+  <section id="content"><div class="card empty console-empty"><span class="material-symbols-outlined empty-icon">monitoring</span><h2>Mercado deportivo en vivo</h2><p>Conecta tus motores y consulta el calendario para cargar cuotas, señales y combinadas.</p><button class="btn primary empty-api" type="button" data-open-api="1">Configurar API</button><small>La caché inteligente evita llamadas repetidas y conserva el último análisis en este dispositivo.</small></div></section>
+  <nav class="tabs" aria-label="Herramientas de análisis">
+    <button class="tab on" data-tab="events"><span class="material-symbols-outlined">sports_score</span>Partidos</button>
+    <button class="tab" data-tab="markets"><span class="material-symbols-outlined">candlestick_chart</span>Mercados</button>
+    <button class="tab" data-tab="performance"><span class="material-symbols-outlined">query_stats</span>Rendimiento</button>
+    <button class="tab" data-tab="bombs"><span class="material-symbols-outlined">bolt</span>Destacados</button>
+    <button class="tab" data-tab="slips">6 bandejas</button>
+    <button class="tab new-tab player-tab" data-tab="playercombo">Jugadores <span>NUEVO</span></button>
+    <button class="tab new-tab unique-tab" data-tab="unique">Únicas <span>NUEVO</span></button>
+    <button class="tab" data-tab="long">Largas 15–30</button>
+  </nav>
+  <details class="analytics-drawer">
+    <summary>Panel cuantitativo y gestión de riesgo <span class="material-symbols-outlined">expand_more</span></summary>
+    <section class="metrics"><div class="card metric"><small>Eventos</small><b id="mEvents">0</b></div><div class="card metric"><small>Mercados</small><b id="mMarkets">0</b></div><div class="card metric"><small>Casas</small><b id="mBooks">0</b></div><div class="card metric"><small>Valor +5%</small><b id="mEdges">0</b></div><div class="card metric"><small>Acierto motor</small><b id="mHit">—</b></div></section>
+    <section class="backtest-strip" id="backtestStrip"><div class="backtest-title"><strong>VALIDACIÓN WALK-FORWARD</strong><small>Solo resultados anteriores · sin fuga de información</small></div><div class="backtest-kpis"><div><small>Muestra</small><b id="wfSamples">—</b></div><div><small>Brier WF</small><b id="wfBrier">—</b></div><div><small>ROI plano</small><b id="wfRoi">—</b></div><div><small>Mejor mercado</small><b id="wfBest">—</b></div></div><div class="market-backtest" id="marketBacktest"><span>Esperando pronósticos liquidados.</span></div></section>
+    <section class="risk-strip" id="riskStrip"><div class="risk-head"><div><strong>RISK DESK · BANKROLL</strong><small>Kelly ¼ + límites de exposición posteriores al cálculo</small></div><span id="riskState">Sin picks asignados</span></div><div class="risk-controls"><label>Bankroll <input id="riskBankroll" type="number" min="1" step="1" value="100"></label><label>Máx. partido % <input id="riskEventCap" type="number" min="1" max="30" step="1" value="6"></label><label>Máx. equipo % <input id="riskTeamCap" type="number" min="1" max="40" step="1" value="10"></label><label>Máx. deporte % <input id="riskSportCap" type="number" min="1" max="60" step="1" value="25"></label></div><div class="risk-summary" id="riskSummary"><span>Configura tu bankroll para calcular stake efectivo y concentración.</span></div></section>
+    <section class="alerts-strip" id="alertsPanel"><div class="alerts-head"><div><strong>PRE-MATCH ALERTS</strong><small>Alineaciones · bajas · cambio de estado · movimiento de mercado</small></div><button class="btn alerts-clear" type="button" data-clear-alerts="1">Limpiar</button></div><div class="alerts-feed" id="alertFeed"><span class="alerts-empty">Sin cambios críticos detectados.</span></div></section>
+  </details>
+  <section class="smart-slip"><span class="slip-icon material-symbols-outlined">content_copy</span><span class="slip-count">4</span><div><b>Combinada IA</b><small>Selecciones con valor · stake Kelly</small></div><button type="button" data-open-combos="1">Revisar <span class="material-symbols-outlined">arrow_forward</span></button></section>
+</main>
+<aside class="side">
+  <button class="filter-toggle" id="filterToggle" type="button"><span class="material-symbols-outlined">tune</span> Configuración de consulta <b>+</b></button>
+  <div class="side-content">
+    <p class="eyebrow">Calendario y ciclo de seguimiento</p>
+    <div class="markets"><div class="field"><label>Desde</label><input class="input" id="dateFrom" type="date"></div><div class="field"><label>Hasta</label><input class="input" id="dateTo" type="date"></div></div>
+    <div class="field"><label>Región de casas</label><select class="select" id="region"><option value="eu">Europa</option><option value="uk">Reino Unido</option><option value="us">Estados Unidos</option><option value="au">Australia</option></select></div>
+    <div class="field"><label>Competiciones activas <span id="sportCount">0</span></label><div class="sports" id="sports"><p class="hint" style="padding:8px">Cargando catálogo.</p></div></div>
+    <div class="field"><label>Mercados principales</label><div class="markets"><label class="market"><input type="checkbox" value="h2h" checked>Ganador</label><label class="market"><input type="checkbox" value="totals" checked>Totales</label><label class="market"><input type="checkbox" value="spreads">Hándicap</label><label class="market"><input type="checkbox" value="outrights">Futuros</label></div><p class="hint">Los mercados avanzados se consultan manualmente por evento para ahorrar créditos.</p></div>
+    <div class="save">Actualización adaptativa: 15 min en vivo · 20 min si inicia pronto · 60 min en modo ahorro.</div>
+  </div>
+</aside>
+</div>
+</div>
 <dialog id="settings"><form method="dialog"><h2>Conectar motores deportivos</h2><p>The Odds API aporta cuotas y API-FOOTBALL añade estadísticas y predicciones. Las claves se guardan únicamente en este dispositivo y no se publican en GitHub.</p><label for="apiKey">The Odds API</label><input class="input" id="apiKey" type="password" autocomplete="off" placeholder="Pega tu API key"><label for="footballKey">API-FOOTBALL</label><input class="input" id="footballKey" type="password" autocomplete="off" placeholder="Pega tu API-Sports key"><div class="modal-actions"><button class="btn" value="cancel">Cancelar</button><button class="btn primary" id="saveKey">Guardar en este dispositivo</button></div></form></dialog>
 <dialog id="advanced"><h2>Mercados del partido</h2><div class="modal-title" id="advTitle"></div><div class="advanced-grid"><label class="market"><input type="checkbox" value="btts" checked>Ambos marcan</label><label class="market"><input type="checkbox" value="btts_h1">Ambos marcan 1T</label><label class="market"><input type="checkbox" value="double_chance" checked>Doble oportunidad</label><label class="market"><input type="checkbox" value="double_chance_h1">Doble oportunidad 1T</label><label class="market"><input type="checkbox" value="draw_no_bet">Empate no acción</label><label class="market"><input type="checkbox" value="correct_score">Marcador exacto</label><label class="market"><input type="checkbox" value="halftime_fulltime">Descanso / final</label><label class="market"><input type="checkbox" value="to_qualify">Clasifica</label><label class="market"><input type="checkbox" value="alternate_spreads">Hándicap alternativo</label><label class="market"><input type="checkbox" value="team_totals">Total por equipo</label><label class="market"><input type="checkbox" value="alternate_team_totals">Total equipo alternativo</label><label class="market"><input type="checkbox" value="alternate_totals_corners">Córners</label><label class="market"><input type="checkbox" value="alternate_team_totals_corners">Córners por equipo</label><label class="market"><input type="checkbox" value="corners_1x2">Ganador en córners</label><label class="market"><input type="checkbox" value="alternate_totals_cards">Tarjetas</label><label class="market"><input type="checkbox" value="player_shots">Remates jugador</label><label class="market"><input type="checkbox" value="player_shots_on_target">Remates al arco</label><label class="market"><input type="checkbox" value="player_to_receive_card">Jugador con tarjeta</label><label class="market"><input type="checkbox" value="h2h_h1">Ganador 1T</label><label class="market"><input type="checkbox" value="spreads_h1">Hándicap 1T</label><label class="market"><input type="checkbox" value="totals_h1">Totales 1T</label><label class="market"><input type="checkbox" value="player_points">Puntos jugador</label><label class="market"><input type="checkbox" value="player_rebounds">Rebotes jugador</label><label class="market"><input type="checkbox" value="player_assists">Asistencias jugador</label><label class="market"><input type="checkbox" value="player_threes">Triples jugador</label><label class="market"><input type="checkbox" value="player_points_rebounds_assists">Puntos + rebotes + asistencias</label><label class="market"><input type="checkbox" value="player_double_double">Doble-doble</label></div><button class="btn primary adv-btn" id="advLoad">Consultar mercados</button><div class="adv-results" id="advResults"></div><div class="modal-actions"><button class="btn" id="advClose">Cerrar</button></div></dialog>
 </div>
 <script type="module" src="./src/main.js"></script>
-</body></html>
+</body>
+</html>
