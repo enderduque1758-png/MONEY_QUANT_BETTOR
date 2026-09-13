@@ -12,8 +12,9 @@ var S={
 };
 var $=function(x){return document.getElementById(x)};
 var API_BASE=location.hostname.endsWith('github.io')?'https://money-quant-bettor-duque3.vercel.app':'';
-var key=function(){return sessionStorage.getItem('mq_odds_api_key')||''};
-var footballKey=function(){return sessionStorage.getItem('mq_football_api_key')||''};
+function persistentKey(name){var saved=localStorage.getItem(name)||'',temporary=sessionStorage.getItem(name)||'';if(!saved&&temporary){localStorage.setItem(name,temporary);saved=temporary}return saved}
+var key=function(){return persistentKey('mq_odds_api_key')};
+var footballKey=function(){return persistentKey('mq_football_api_key')};
 var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
 function readJson(k,fallback){try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(fallback))}catch(_){return fallback}}
 function saveJson(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(_){}}
@@ -114,7 +115,7 @@ document.querySelectorAll('.tab').forEach(function(b){b.onclick=function(){docum
 ['riskBankroll','riskEventCap','riskTeamCap','riskSportCap'].forEach(function(id){if($(id))$(id).onchange=saveRiskSettings});loadRiskSettings();
 if($('alertsPanel'))$('alertsPanel').onclick=function(e){if(e.target.closest('[data-clear-alerts]')){S.alerts=[];renderAlertsPanel()}};
 $('content').onclick=function(e){var pw=e.target.closest('[data-perf-window]');if(pw){S.performanceWindow=Number(pw.dataset.perfWindow)||30;render();return}var b=e.target.closest('[data-adv]');if(b)openAdvanced(b)};
-$('advLoad').onclick=loadAdvanced;$('advClose').onclick=function(){$('advanced').close()};$('settingsBtn').onclick=function(){$('apiKey').value=key();$('footballKey').value=footballKey();$('settings').showModal()};$('saveKey').onclick=function(e){e.preventDefault();var odds=$('apiKey').value.trim(),football=$('footballKey').value.trim();if(odds)sessionStorage.setItem('mq_odds_api_key',odds);else sessionStorage.removeItem('mq_odds_api_key');if(football)sessionStorage.setItem('mq_football_api_key',football);else sessionStorage.removeItem('mq_football_api_key');$('settings').close();$('error').style.display='none';setTimeout(loadSports,0)};$('syncBtn').onclick=sync;$('shuffleBtn').onclick=function(){newSeed();render();$('status').textContent='Combinadas barajadas · sin consumir créditos'};$('search').oninput=render;$('filter').onchange=render;
+$('advLoad').onclick=loadAdvanced;$('advClose').onclick=function(){$('advanced').close()};$('settingsBtn').onclick=function(){$('apiKey').value=key();$('footballKey').value=footballKey();$('settings').showModal()};$('saveKey').onclick=function(e){e.preventDefault();var odds=$('apiKey').value.trim(),football=$('footballKey').value.trim();if(odds)localStorage.setItem('mq_odds_api_key',odds);else localStorage.removeItem('mq_odds_api_key');if(football)localStorage.setItem('mq_football_api_key',football);else localStorage.removeItem('mq_football_api_key');sessionStorage.removeItem('mq_odds_api_key');sessionStorage.removeItem('mq_football_api_key');$('settings').close();$('error').style.display='none';setTimeout(loadSports,0)};$('syncBtn').onclick=sync;$('shuffleBtn').onclick=function(){newSeed();render();$('status').textContent='Combinadas barajadas · sin consumir créditos'};$('search').oninput=render;$('filter').onchange=render;
 var today=new Date(),tomorrow=new Date(Date.now()+86400000);$('dateFrom').value=today.toISOString().slice(0,10);$('dateTo').value=tomorrow.toISOString().slice(0,10);
 setInterval(function(){if(!document.hidden&&S.events.length)footballRefresh(true)},300000);
 setInterval(function(){var last=Number(localStorage.getItem('mq_last_odds_sync')||0);if(!document.hidden&&S.events.length&&key()&&Date.now()-last>=900000){localStorage.setItem('mq_last_odds_sync',String(Date.now()));sync()}},60000);
