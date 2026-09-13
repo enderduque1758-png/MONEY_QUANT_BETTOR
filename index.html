@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MONEY QUANT BETTOR</title>
-<link rel="stylesheet" href="/src/styles.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/enderduque1758-png/MONEY_QUANT_BETTOR@9b121175705ef85628bfa908ff56f0622ffa2f37/src/styles.css">
 </head>
 <body>
 <div id="app">
@@ -35,5 +35,17 @@
 <dialog id="settings"><form method="dialog"><h2>Conectar motores deportivos</h2><p>The Odds API aporta cuotas, API-FOOTBALL añade estadísticas y predicciones, y Parse/Betano funciona como fuente secundaria de contraste. Las claves de backend no se muestran en la interfaz.</p><label for="apiKey">The Odds API</label><input class="input" id="apiKey" type="password" autocomplete="off" placeholder="Pega tu API key"><label for="footballKey">API-FOOTBALL</label><input class="input" id="footballKey" type="password" autocomplete="off" placeholder="Pega tu API-Sports key"><div class="modal-actions"><button class="btn" value="cancel">Cancelar</button><button class="btn primary" id="saveKey">Guardar en sesión</button></div></form></dialog>
 <dialog id="advanced"><h2>Mercados del partido</h2><div class="modal-title" id="advTitle"></div><div class="advanced-grid"><label class="market"><input type="checkbox" value="btts" checked>Ambos marcan</label><label class="market"><input type="checkbox" value="btts_h1">Ambos marcan 1T</label><label class="market"><input type="checkbox" value="double_chance" checked>Doble oportunidad</label><label class="market"><input type="checkbox" value="double_chance_h1">Doble oportunidad 1T</label><label class="market"><input type="checkbox" value="draw_no_bet">Empate no acción</label><label class="market"><input type="checkbox" value="correct_score">Marcador exacto</label><label class="market"><input type="checkbox" value="halftime_fulltime">Descanso / final</label><label class="market"><input type="checkbox" value="to_qualify">Clasifica</label><label class="market"><input type="checkbox" value="alternate_spreads">Hándicap alternativo</label><label class="market"><input type="checkbox" value="team_totals">Total por equipo</label><label class="market"><input type="checkbox" value="alternate_team_totals">Total equipo alternativo</label><label class="market"><input type="checkbox" value="alternate_totals_corners">Córners</label><label class="market"><input type="checkbox" value="alternate_team_totals_corners">Córners por equipo</label><label class="market"><input type="checkbox" value="corners_1x2">Ganador en córners</label><label class="market"><input type="checkbox" value="alternate_totals_cards">Tarjetas</label><label class="market"><input type="checkbox" value="player_shots">Remates jugador</label><label class="market"><input type="checkbox" value="player_shots_on_target">Remates al arco</label><label class="market"><input type="checkbox" value="player_to_receive_card">Jugador con tarjeta</label><label class="market"><input type="checkbox" value="h2h_h1">Ganador 1T</label><label class="market"><input type="checkbox" value="spreads_h1">Hándicap 1T</label><label class="market"><input type="checkbox" value="totals_h1">Totales 1T</label><label class="market"><input type="checkbox" value="player_points">Puntos jugador</label><label class="market"><input type="checkbox" value="player_rebounds">Rebotes jugador</label><label class="market"><input type="checkbox" value="player_assists">Asistencias jugador</label><label class="market"><input type="checkbox" value="player_threes">Triples jugador</label><label class="market"><input type="checkbox" value="player_points_rebounds_assists">Puntos + rebotes + asistencias</label><label class="market"><input type="checkbox" value="player_double_double">Doble-doble</label></div><button class="btn primary adv-btn" id="advLoad">Consultar mercados</button><div class="adv-results" id="advResults"></div><div class="modal-actions"><button class="btn" id="advClose">Cerrar</button></div></dialog>
 </div>
-<script type="module" src="/src/main.js"></script>
+<script type="module">
+const sourceUrl='https://cdn.jsdelivr.net/gh/enderduque1758-png/MONEY_QUANT_BETTOR@9b121175705ef85628bfa908ff56f0622ffa2f37/src/main.js';
+try{
+  const r=await fetch(sourceUrl);
+  if(!r.ok)throw new Error('No se pudo cargar el motor principal');
+  const src=(await r.text()).replace(/^import\s+['"]\.\/styles\.css['"];?\s*/, '');
+  const u=URL.createObjectURL(new Blob([src],{type:'text/javascript'}));
+  try{await import(u)}finally{URL.revokeObjectURL(u)}
+}catch(e){
+  const el=document.getElementById('error');
+  if(el){el.style.display='block';el.textContent=e.message||String(e)}
+}
+</script>
 </body></html>
