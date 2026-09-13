@@ -49,4 +49,30 @@
 
 - P3: add licensed team crests if a reliable crest asset source is connected later.
 
+## Current iteration
+
+- The Top Opportunities component now renders up to 24 positive-edge rows, adds market-group filters, and exposes a working “VER TODAS” toggle. This iteration preserves the source palette, borders, typography, and responsive density.
+- The market matrix now exposes one complete, selectable sport at a time and the event-market dialog is generated from that sport's catalog. The catalog uses documented The Odds API keys for soccer, basketball, tennis, baseball, ice hockey, and American football, with explicit automatic, per-event, and loaded states.
+- Source issue capture: `/workspace/scratch/163eff1eccbf/upload/de0d41f3-f765-4afd-8f94-6010c1ea9f5d.png` (1448 × 122 px), showing the matrix header without usable per-sport navigation in the captured region.
+- Browser-rendered implementation: `https://money-quant-bettor-duque3.vercel.app/?v=markets-v2`, captured at 1365 × 936 CSS px. The source is a focused header crop, so comparison was normalized by inspecting the corresponding matrix header plus the immediately following navigation and rows.
+- Production interaction checks passed for all six tabs: Fútbol 27, Baloncesto 26, Tenis 9, Béisbol 20, Hockey 17, and Fútbol americano 20. Selecting Tenis displayed its nine sport-specific markets and preserved the automatic/per-event status legend.
+- No application-origin console errors were observed; the only logged errors came from a browser extension. The local preview remained blocked by `net::ERR_BLOCKED_BY_CLIENT`, but production browser evidence and interaction testing completed successfully.
+
+## Hidden-market button iteration
+
+- Source visual truth: `/workspace/scratch/163eff1eccbf/upload/e86a8b27-3ac7-4310-bbda-b4666ae74f05.png` (1427 × 152 px).
+- Browser-rendered implementation: `/workspace/scratch/163eff1eccbf/money-quant-bettor/implementation-market-buttons.png` (1148 × 195 px), captured from `https://money-quant-bettor-duque3.vercel.app/?v=hidden-markets-final` in cloud Chrome.
+- Combined comparison: `/workspace/scratch/163eff1eccbf/money-quant-bettor/qa-market-buttons-comparison.png` (1148 × 317 px). The source was normalized to 1148 × 122 px; the implementation remained at native capture density.
+- Viewport: 1365 × 936 CSS px, device scale factor 1. State: no API key in the verification browser, Córners selected, all market counters at zero.
+- Full-view evidence: the implementation preserves the source's navy panel, lime star and active state, cyan borders, condensed title, compact subtitle, pill controls, counter badges, and horizontal toolbar rhythm. The additional buttons intentionally extend beyond the source crop and remain horizontally scrollable.
+- Focused evidence: all eleven buttons are present: Todos, Ganador, Doble oportunidad, Totales, Hándicap, Ambos marcan, Periodos, Córners, Tarjetas, Jugadores, and Especiales. Zero-count buttons remain selectable and use a dashed inactive treatment. Selecting Córners changed `aria-pressed` to true and rendered its market-specific empty state.
+- Fonts and typography: Barlow Condensed and Inter retain the source hierarchy, compact sizing, weight, line height, and truncation behavior.
+- Spacing and layout rhythm: header padding, 8 px pill gaps, 32 px control height, section borders, and mobile-safe horizontal overflow match the established component.
+- Colors and tokens: existing navy, cyan, lime, and muted blue-gray design tokens are reused; no new competing palette was introduced.
+- Image and icon fidelity: no new raster assets were needed; the source uses the existing star mark and text controls.
+- Copy and content: Spanish labels explicitly expose formerly hidden market families and explain an empty selection without implying that a market is unavailable permanently.
+- Primary interactions tested: selecting the Córners zero-count button, active `aria-pressed` state, empty-state rendering, and horizontal overflow. No API call is triggered by these local filters.
+- Console check: no application-origin warnings or errors were observed. Browser-extension metadata errors were excluded.
+- Comparison history: initial browser capture did not render the component before data was loaded. Fixed by running the existing renderer during initialization and appending Top Opportunities to the zero-event state. The subsequent capture showed the complete toolbar and working selection state; no actionable P0/P1/P2 differences remain.
+
 final result: passed
