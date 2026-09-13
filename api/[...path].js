@@ -2,7 +2,7 @@ const ODDS='https://api.the-odds-api.com/v4';
 const FOOT='https://v3.football.api-sports.io';
 const cache=new Map();
 const inflight=new Map();
-const CACHE_TTL={sports:21600000,odds:900000,combo:300000,event:120000};
+const CACHE_TTL={sports:43200000,odds:1200000,combo:1800000,event:600000};
 const ALLOWED_ORIGINS=new Set([
   'https://enderduque1758-png.github.io',
   'https://money-quant-bettor.vercel.app'
