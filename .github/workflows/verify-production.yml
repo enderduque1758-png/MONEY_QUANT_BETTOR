@@ -30,11 +30,14 @@ jobs:
         run: |
           set -euo pipefail
           test -f dist/index.html
-          grep -q 'production-engine.js' dist/index.html
-          grep -q 'integration-core.js' dist/index.html
+          grep -q 'performance-loader.js' dist/index.html
+          grep -q 'font-loader.js' dist/index.html
+          test -f dist/src/production-engine.js
+          test -f dist/src/integration-core.js
+          test -f dist/src/analytics-v2.js
           test -f api/health.js
           test -f api/preflight.js
           test -f api/state.js
           test -f api/settle.js
           test -f api/closing-line.js
-          echo 'Production integration contract OK'
+          echo 'Production integration contract OK (lazy modules)'
