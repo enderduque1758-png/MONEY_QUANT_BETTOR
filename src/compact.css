@@ -45,3 +45,17 @@ dialog{border-radius:10px;padding:15px}.advanced-grid{gap:5px}.adv-results{max-h
   .analytics-drawer{margin-bottom:8px}
   .console-empty{min-height:320px;margin-bottom:8px}
 }
+
+
+/* Mobile performance mode: avoid expensive repaints and touch lockups. */
+@media(max-width:620px){
+  html{scroll-behavior:auto!important}
+  body{background:#020b10!important}
+  body:before,.command.console-v3:before,.command.console-v3:after{display:none!important}
+  .top{position:static!important}
+  .top,.smart-slip,.side,.command.console-v3{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:none!important}
+  .card,.match-card,.combo,.bomb,.bomb-combo,.slip,.long-card{box-shadow:none!important}
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .match-card,.combo,.bomb,.bomb-combo,.slip,.long-card{content-visibility:auto;contain-intrinsic-size:180px;contain:layout paint style}
+  .side-content{-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+}
