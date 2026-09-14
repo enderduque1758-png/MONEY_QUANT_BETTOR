@@ -25,9 +25,6 @@ await writeFile(mainPath, main, 'utf8');
 
 const indexPath = new URL('index.html', dist);
 let html = await readFile(indexPath, 'utf8');
-html = html.replace(/<link rel="preconnect" href="https:\/\/fonts\.googleapis\.com">\s*/g,'');
-html = html.replace(/<link rel="preconnect" href="https:\/\/fonts\.gstatic\.com" crossorigin>\s*/g,'');
-html = html.replace(/<link href="https:\/\/fonts\.googleapis\.com\/css2[^>]+rel="stylesheet">\s*/g,'');
 html = html.replace('<script type="module" src="./src/market-options.js"></script>','');
 html = html.replace('<script type="module" src="./src/analytics-ui.js"></script>','');
 html = html.replace('<script type="module" src="./src/analytics-v2.js"></script>','');
