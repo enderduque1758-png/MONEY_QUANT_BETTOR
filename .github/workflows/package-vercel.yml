@@ -14,13 +14,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install exact lockfile
+        run: npm ci
+      - name: Verify production integration
+        run: npm run test:prod
       - name: Build production source package
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p package/src package/server package/api package/scripts
-
           cp .nvmrc package/
           cp .env.example package/
           cp index.html package/
@@ -28,34 +35,31 @@ jobs:
           cp package-lock.json package/
           cp vercel.json package/
           cp scripts/build-static.mjs package/scripts/
-
+          cp scripts/prod-smoke.mjs package/scripts/
           cp -R src/. package/src/
           cp -R server/. package/server/
           cp api/*.js package/api/
-
           cat > package/DEPLOY_VERCEL.txt <<'EOF'
-          MONEY_QUANT_BETTOR - Vercel Production
+          MONEY_QUANT_BETTOR - Vercel Production Integration v2
 
-          1. Upload/import this folder into Vercel.
-          2. Framework preset: Other / No framework.
-          3. Build command: npm run build
-          4. Output directory: dist
-          5. Node.js: 22.x
-          6. Root directory: project root (.).
-          7. Configure these secrets in Vercel Production:
-             THE_ODDS_API_KEY
-             API_FOOTBALL_KEY
-          8. Recommended for durable learning/state across devices:
-             UPSTASH_REDIS_REST_URL
-             UPSTASH_REDIS_REST_TOKEN
-             (or KV_REST_API_URL / KV_REST_API_TOKEN)
-          9. Redeploy after adding/changing environment variables.
-          10. Validate /, /api/health, /api/sports, /api/odds, /api/state and /api/settle.
+          Framework preset: Other / No framework
+          Build command: npm run build
+          Output directory: dist
+          Node.js: 22.x
+          Root directory: .
+
+          Required Production secrets:
+          THE_ODDS_API_KEY
+          API_FOOTBALL_KEY
+          UPSTASH_REDIS_REST_URL
+          UPSTASH_REDIS_REST_TOKEN
+          (KV_REST_API_URL / KV_REST_API_TOKEN are accepted alternatives for persistence)
+
+          /api/health intentionally returns 503 while required production configuration is incomplete.
+          Validate: /, /api/health, /api/preflight, /api/sports, /api/odds, /api/state, /api/settle, /api/closing-line.
           EOF
-
           cd package
           zip -r ../MONEY_QUANT_BETTOR_VERCEL_STATIC_FIX.zip .
-
       - name: Upload ZIP artifact
         uses: actions/upload-artifact@v4
         with:
