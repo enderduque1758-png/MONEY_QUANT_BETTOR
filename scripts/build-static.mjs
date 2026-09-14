@@ -5,7 +5,6 @@ const root = new URL('../', import.meta.url);
 
 await rm(dist, { recursive: true, force: true });
 await mkdir(new URL('./src/', dist), { recursive: true });
-
 await copyFile(new URL('index.html', root), new URL('index.html', dist));
 await cp(new URL('src/', root), new URL('src/', dist), { recursive: true });
 
@@ -17,7 +16,8 @@ await writeFile(mainPath, main, 'utf8');
 
 const indexPath = new URL('index.html', dist);
 let html = await readFile(indexPath, 'utf8');
-if(!html.includes('production-engine.js')) html = html.replace('</body>', '<script type="module" src="./src/production-engine.js"></script>\n</body>');
+const scripts=['production-engine.js','integration-core.js'];
+for(const file of scripts){if(!html.includes(file))html=html.replace('</body>',`<script type="module" src="./src/${file}"></script>\n</body>`)}
 await writeFile(indexPath, html, 'utf8');
 
-console.log('Static build ready: dist/index.html + dist/src/* + production quality gate');
+console.log('Static build ready: dist/index.html + dist/src/* + forced production integration');
