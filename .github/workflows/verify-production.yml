@@ -1,0 +1,40 @@
+name: Verify Production Integration
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install exact lockfile
+        run: npm ci
+      - name: Build and smoke test
+        run: npm run test:prod
+      - name: Validate Vercel contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f dist/index.html
+          grep -q 'production-engine.js' dist/index.html
+          grep -q 'integration-core.js' dist/index.html
+          test -f api/health.js
+          test -f api/preflight.js
+          test -f api/state.js
+          test -f api/settle.js
+          test -f api/closing-line.js
+          echo 'Production integration contract OK'
