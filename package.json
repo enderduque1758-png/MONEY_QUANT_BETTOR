@@ -1,12 +1,13 @@
 {
   "name": "money-quant-bettor-vercel-direct",
   "private": true,
-  "version": "2.1.0",
+  "version": "2.2.0",
   "type": "module",
   "engines": {
     "node": "22.x"
   },
   "scripts": {
-    "build": "node scripts/build-static.mjs"
+    "build": "node scripts/build-static.mjs",
+    "test:prod": "npm run build && node scripts/prod-smoke.mjs"
   }
 }
