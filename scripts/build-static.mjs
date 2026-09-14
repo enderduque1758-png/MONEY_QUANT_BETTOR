@@ -12,6 +12,12 @@ await cp(new URL('src/', root), new URL('src/', dist), { recursive: true });
 const mainPath = new URL('src/main.js', dist);
 let main = await readFile(mainPath, 'utf8');
 main = main.replace(/^\s*import\s+['"]\.\/styles\.css['"];?\s*/m, '');
+main = main.replace("state=noBet?'NO BET':apto?'APTO':'VIGILAR';if(h.state==='watch'&&state==='APTO')state='VIGILAR';", "state=noBet?'NO BET':apto?'APTO':'VIGILAR';if(h.state==='watch'&&state==='APTO')state='VIGILAR';try{var qg=readJson('mq_quality_gate_v1',{});if(qg.state==='blocked')state='NO BET';else if(qg.state==='watch'&&state==='APTO')state='VIGILAR'}catch(_){}");
 await writeFile(mainPath, main, 'utf8');
 
-console.log('Static build ready: dist/index.html + dist/src/*');
+const indexPath = new URL('index.html', dist);
+let html = await readFile(indexPath, 'utf8');
+if(!html.includes('production-engine.js')) html = html.replace('</body>', '<script type="module" src="./src/production-engine.js"></script>\n</body>');
+await writeFile(indexPath, html, 'utf8');
+
+console.log('Static build ready: dist/index.html + dist/src/* + production quality gate');
