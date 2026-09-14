@@ -1,0 +1,3 @@
+Force Vercel production sync from GitHub main.
+Timestamp: 2026-09-13T21:29:00-05:00
+Target: latest production configuration with root rewrite, 10-event pagination, lazy modules, and 11 serverless functions.
