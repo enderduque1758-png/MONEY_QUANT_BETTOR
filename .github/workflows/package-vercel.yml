@@ -1,0 +1,63 @@
+name: Package Vercel Production ZIP
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build production source package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p package/src package/server package/api
+
+          cp .nvmrc package/
+          cp .env.example package/
+          cp index.html package/
+          cp package.json package/
+          cp package-lock.json package/
+          cp vercel.json package/
+
+          cp src/main.js package/src/
+          cp src/styles.css package/src/
+          cp src/sportsbook.css package/src/
+          cp src/compact.css package/src/
+
+          cp server/handler.js package/server/
+          cp api/*.js package/api/
+
+          cat > package/DEPLOY_VERCEL.txt <<'EOF'
+          MONEY_QUANT_BETTOR - Vercel Production
+
+          1. Upload/import this folder into Vercel.
+          2. Framework: Vite
+          3. Build command: npm run build
+          4. Output directory: dist
+          5. Node.js: 22.x
+          6. Configure these secrets in Vercel Production (do not put their values in source files):
+             THE_ODDS_API_KEY
+             API_FOOTBALL_KEY
+          7. Redeploy after adding/changing the secrets.
+          8. Validate /api/health, /api/sports and /api/odds.
+          EOF
+
+          cd package
+          zip -r ../MONEY_QUANT_BETTOR_VERCEL_FIXED.zip .
+
+      - name: Upload ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MONEY_QUANT_BETTOR_VERCEL_FIXED
+          path: MONEY_QUANT_BETTOR_VERCEL_FIXED.zip
+          if-no-files-found: error
+          retention-days: 7
