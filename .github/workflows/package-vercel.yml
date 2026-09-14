@@ -29,12 +29,8 @@ jobs:
           cp vercel.json package/
           cp scripts/build-static.mjs package/scripts/
 
-          cp src/main.js package/src/
-          cp src/styles.css package/src/
-          cp src/sportsbook.css package/src/
-          cp src/compact.css package/src/
-
-          cp server/handler.js package/server/
+          cp -R src/. package/src/
+          cp -R server/. package/server/
           cp api/*.js package/api/
 
           cat > package/DEPLOY_VERCEL.txt <<'EOF'
@@ -46,11 +42,15 @@ jobs:
           4. Output directory: dist
           5. Node.js: 22.x
           6. Root directory: project root (.).
-          7. Configure these secrets in Vercel Production (do not put their values in source files):
+          7. Configure these secrets in Vercel Production:
              THE_ODDS_API_KEY
              API_FOOTBALL_KEY
-          8. Redeploy after adding/changing the secrets.
-          9. Validate /, /api/health, /api/sports and /api/odds.
+          8. Recommended for durable learning/state across devices:
+             UPSTASH_REDIS_REST_URL
+             UPSTASH_REDIS_REST_TOKEN
+             (or KV_REST_API_URL / KV_REST_API_TOKEN)
+          9. Redeploy after adding/changing environment variables.
+          10. Validate /, /api/health, /api/sports, /api/odds, /api/state and /api/settle.
           EOF
 
           cd package
