@@ -78,6 +78,31 @@
     <div class="field"><label>Región de casas</label><select class="select" id="region"><option value="eu">Europa</option><option value="uk">Reino Unido</option><option value="us">Estados Unidos</option><option value="au">Australia</option></select></div>
     <div class="field"><label>Competiciones activas <span id="sportCount">0</span></label><div class="sports" id="sports"><p class="hint" style="padding:8px">Cargando catálogo.</p></div></div>
     <div class="field"><label>Mercados principales</label><div class="markets"><label class="market"><input type="checkbox" value="h2h" checked>Ganador</label><label class="market"><input type="checkbox" value="totals" checked>Totales</label><label class="market"><input type="checkbox" value="spreads">Hándicap</label><label class="market"><input type="checkbox" value="outrights">Futuros</label></div><p class="hint">Los mercados avanzados se consultan manualmente por evento para ahorrar créditos.</p></div>
+    <details class="extra-market-picker" id="extraMarketPicker">
+      <summary><span><span class="material-symbols-outlined">add_chart</span> Agregar más mercados</span><b id="extraMarketCount">0 activos</b></summary>
+      <div class="extra-market-body">
+        <p class="extra-market-note">Guarda tus mercados avanzados favoritos. Se preseleccionarán al abrir un partido, evitando consultas masivas costosas.</p>
+        <div class="extra-market-grid" id="extraMarketGrid">
+          <label><input type="checkbox" value="btts">Ambos equipos marcan</label>
+          <label><input type="checkbox" value="team_totals">Total por equipo</label>
+          <label><input type="checkbox" value="alternate_totals">Totales alternativos</label>
+          <label><input type="checkbox" value="draw_no_bet">Empate no acción</label>
+          <label><input type="checkbox" value="alternate_totals_corners">Córners totales</label>
+          <label><input type="checkbox" value="alternate_team_totals_corners">Córners por equipo</label>
+          <label><input type="checkbox" value="alternate_spreads_corners">Hándicap córners</label>
+          <label><input type="checkbox" value="corners_1x2">Ganador en córners</label>
+          <label><input type="checkbox" value="alternate_totals_cards">Total tarjetas</label>
+          <label><input type="checkbox" value="alternate_spreads_cards">Hándicap tarjetas</label>
+          <label><input type="checkbox" value="totals_h1">Total 1.er tiempo</label>
+          <label><input type="checkbox" value="h2h_h1">Ganador 1.er tiempo</label>
+          <label><input type="checkbox" value="player_shots">Remates jugador</label>
+          <label><input type="checkbox" value="player_shots_on_target">Remates al arco</label>
+          <label><input type="checkbox" value="player_to_receive_card">Tarjeta de jugador</label>
+          <label><input type="checkbox" value="player_goal_scorer_anytime">Anotador</label>
+        </div>
+        <div class="extra-market-actions"><button class="btn" id="clearExtraMarkets" type="button">Limpiar</button><button class="btn primary" id="saveExtraMarkets" type="button">Guardar selección</button></div>
+      </div>
+    </details>
     <div class="save">Actualización adaptativa: 15 min en vivo · 20 min si inicia pronto · 60 min en modo ahorro.</div>
   </div>
 </aside>
@@ -88,5 +113,7 @@
 <dialog id="marketEventPicker"><h2>Consulta por evento</h2><div class="modal-title"><b id="marketEventTitle">Mercado</b><span id="marketEventHelp">Selecciona un partido.</span></div><label for="marketEventSelect">Evento</label><select class="select market-event-select" id="marketEventSelect"></select><p class="hint">Esta acción solicita únicamente el mercado indicado para el evento seleccionado.</p><div class="adv-results" id="marketEventResult"></div><div class="modal-actions"><button class="btn" id="marketEventClose" type="button">Cerrar</button><button class="btn primary" id="marketEventLoad" type="button">Cargar mercado</button></div></dialog>
 </div>
 <script type="module" src="./src/main.js"></script>
+<script type="module" src="./src/market-options.js"></script>
+<script type="module" src="./src/analytics-ui.js"></script>
 </body>
 </html>
