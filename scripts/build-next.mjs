@@ -1,0 +1,1 @@
+import{rm,mkdir,cp}from'node:fs/promises';const out=new URL('../dist-next/',import.meta.url),src=new URL('../next/',import.meta.url);await rm(out,{recursive:true,force:true});await mkdir(out,{recursive:true});await cp(src,out,{recursive:true});console.log('MQ Next build ready');
