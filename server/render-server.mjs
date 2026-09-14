@@ -1,7 +1,7 @@
 import http from 'node:http';
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { extname, join, normalize, resolve } from 'node:path';
-import engine from '../api/engine.js';
+import handler from './handler.js';
 
 const root = resolve(process.cwd());
 const publicDir = join(root, 'dist');
@@ -20,46 +20,36 @@ const types = {
   '.woff2': 'font/woff2'
 };
 
-function json(res, status, value) {
-  res.statusCode = status;
-  res.setHeader('content-type', 'application/json; charset=utf-8');
-  res.setHeader('cache-control', 'no-store');
-  res.end(JSON.stringify(value));
+function enhance(req, res) {
+  res.req = req;
+  res.status = code => { res.statusCode = code; return res; };
+  res.json = data => {
+    if (res.writableEnded) return;
+    res.setHeader('content-type', 'application/json; charset=utf-8');
+    res.setHeader('cache-control', 'no-store');
+    res.end(JSON.stringify(data));
+  };
 }
 
-async function bodyOf(req) {
-  if (!['POST', 'PUT', 'PATCH'].includes(req.method || 'GET')) return undefined;
+async function parseBody(req) {
+  if (!['POST', 'PUT', 'PATCH'].includes(req.method || 'GET')) return {};
   let raw = '';
   for await (const chunk of req) {
     raw += chunk;
     if (raw.length > 1024 * 1024) throw new Error('Solicitud demasiado grande');
   }
-  return raw || undefined;
+  if (!raw) return {};
+  return JSON.parse(raw);
 }
 
 async function serveApi(req, res) {
   try {
-    const body = await bodyOf(req);
-    const headers = new Headers();
-    for (const [name, value] of Object.entries(req.headers)) {
-      if (typeof value === 'string') headers.set(name, value);
-    }
-    const request = new Request('https://money-quant.local' + req.url, {
-      method: req.method,
-      headers,
-      body
-    });
-    const response = await engine.fetch(request, {
-      THE_ODDS_API_KEY: process.env.THE_ODDS_API_KEY || '',
-      API_FOOTBALL_KEY: process.env.API_FOOTBALL_KEY || '',
-      BETANO_SUPPORT_API_KEY: process.env.BETANO_SUPPORT_API_KEY || ''
-    });
-    res.statusCode = response.status;
-    response.headers.forEach((value, name) => res.setHeader(name, value));
-    res.setHeader('cache-control', 'no-store');
-    res.end(Buffer.from(await response.arrayBuffer()));
+    enhance(req, res);
+    req.body = await parseBody(req);
+    req.query = Object.fromEntries(new URL(req.url, 'http://local').searchParams);
+    await handler(req, res);
   } catch (error) {
-    json(res, 500, { error: error instanceof Error ? error.message : 'Error interno' });
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Error interno' });
   }
 }
 
@@ -69,7 +59,11 @@ function serveStatic(req, res) {
   const requested = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '');
   let file = normalize(join(publicDir, requested));
   if (!file.startsWith(publicDir) || !existsSync(file) || statSync(file).isDirectory()) file = join(publicDir, 'index.html');
-  if (!existsSync(file)) return json(res, 503, { error: 'Build no disponible' });
+  if (!existsSync(file)) {
+    res.statusCode = 503;
+    res.setHeader('content-type', 'application/json; charset=utf-8');
+    return res.end(JSON.stringify({ error: 'Build no disponible' }));
+  }
   res.statusCode = 200;
   res.setHeader('content-type', types[extname(file).toLowerCase()] || 'application/octet-stream');
   res.setHeader('x-content-type-options', 'nosniff');
