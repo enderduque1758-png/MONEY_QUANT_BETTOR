@@ -16,9 +16,12 @@ await writeFile(mainPath, main, 'utf8');
 
 const indexPath = new URL('index.html', dist);
 let html = await readFile(indexPath, 'utf8');
-html = html.replace('<script type="module" src="./src/analytics-ui.js"></script>','<script type="module" src="./src/analytics-v2.js"></script>');
-const scripts=['production-engine.js','integration-core.js'];
-for(const file of scripts){if(!html.includes(file))html=html.replace('</body>',`<script type="module" src="./src/${file}"></script>\n</body>`)}
+html = html.replace('<script type="module" src="./src/market-options.js"></script>','');
+html = html.replace('<script type="module" src="./src/analytics-ui.js"></script>','');
+html = html.replace('<script type="module" src="./src/analytics-v2.js"></script>','');
+html = html.replace('<script type="module" src="./src/production-engine.js"></script>','');
+html = html.replace('<script type="module" src="./src/integration-core.js"></script>','');
+if(!html.includes('performance-loader.js'))html=html.replace('</body>','<script type="module" src="./src/performance-loader.js"></script>\n</body>');
 await writeFile(indexPath, html, 'utf8');
 
-console.log('Static build ready: analytics v2 + production engine + forced integration core');
+console.log('Static build ready: fast first paint + lazy analytics/production modules');
