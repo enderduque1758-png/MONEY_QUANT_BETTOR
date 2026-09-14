@@ -67,6 +67,7 @@ function serveStatic(req, res) {
   res.statusCode = 200;
   res.setHeader('content-type', types[extname(file).toLowerCase()] || 'application/octet-stream');
   res.setHeader('x-content-type-options', 'nosniff');
+  res.setHeader('cache-control', /\\.(?:html|js|css)$/i.test(file) ? 'no-store, max-age=0' : 'public, max-age=3600');
   createReadStream(file).pipe(res);
 }
 
