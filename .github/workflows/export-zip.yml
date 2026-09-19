@@ -1,4 +1,5 @@
 name: Export latest ZIP
+# full-project export
 on:
   push:
     branches: [main]
