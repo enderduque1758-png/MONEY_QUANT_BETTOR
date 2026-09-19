@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700&family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet">
 <link rel="stylesheet" href="./src/styles.css">
-<link rel="stylesheet" href="./src/sportsbook.css">
 <link rel="stylesheet" href="./src/compact.css">
+<link rel="stylesheet" href="./src/sportsbook.css">
 </head>
 <body>
 <div id="app">
@@ -68,7 +68,7 @@
     <section class="risk-strip" id="riskStrip"><div class="risk-head"><div><strong>RISK DESK · BANKROLL</strong><small>Kelly ¼ + límites de exposición posteriores al cálculo</small></div><span id="riskState">Sin picks asignados</span></div><div class="risk-controls"><label>Bankroll <input id="riskBankroll" type="number" min="1" step="1" value="100"></label><label>Máx. partido % <input id="riskEventCap" type="number" min="1" max="30" step="1" value="6"></label><label>Máx. equipo % <input id="riskTeamCap" type="number" min="1" max="40" step="1" value="10"></label><label>Máx. deporte % <input id="riskSportCap" type="number" min="1" max="60" step="1" value="25"></label></div><div class="risk-summary" id="riskSummary"><span>Configura tu bankroll para calcular stake efectivo y concentración.</span></div></section>
     <section class="alerts-strip" id="alertsPanel"><div class="alerts-head"><div><strong>PRE-MATCH ALERTS</strong><small>Alineaciones · bajas · cambio de estado · movimiento de mercado</small></div><button class="btn alerts-clear" type="button" data-clear-alerts="1">Limpiar</button></div><div class="alerts-feed" id="alertFeed"><span class="alerts-empty">Sin cambios críticos detectados.</span></div></section>
   </details>
-  <section class="smart-slip"><span class="slip-icon material-symbols-outlined">content_copy</span><span class="slip-count">4</span><div><b>Combinada IA</b><small>Selecciones con valor · stake Kelly</small></div><button type="button" data-open-combos="1">Revisar <span class="material-symbols-outlined">arrow_forward</span></button></section>
+  <section class="smart-slip sportsbook-betslip"><div class="betslip-head"><span class="slip-icon material-symbols-outlined">receipt_long</span><div><b>Betslip IA</b><small>Selecciones con valor y control de riesgo</small></div></div><div class="betslip-summary"><span><small>Selecciones</small><b>4</b></span><span><small>Cuota total</small><b>—</b></span><span><small>Stake</small><b>—</b></span></div><button type="button" data-open-combos="1">Ver betslip <span class="material-symbols-outlined">arrow_forward</span></button></section>
 </main>
 <aside class="side">
   <button class="filter-toggle" id="filterToggle" type="button"><span class="material-symbols-outlined">tune</span> Configuración de consulta <b>+</b></button>
