@@ -1,0 +1,19 @@
+name: Export latest ZIP
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create ZIP
+        run: |
+          zip -qr MONEY_QUANT_BETTOR-latest.zip . -x ".git/*" "MONEY_QUANT_BETTOR-latest.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MONEY_QUANT_BETTOR-latest
+          path: MONEY_QUANT_BETTOR-latest.zip
+          retention-days: 1
