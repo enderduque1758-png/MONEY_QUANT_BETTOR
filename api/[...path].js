@@ -6,7 +6,7 @@ export default function(req,res){
     if(origin)res.setHeader('Access-Control-Allow-Origin',origin);
     res.setHeader('Vary','Origin');
     res.setHeader('Access-Control-Allow-Methods','GET,POST,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers','Content-Type,X-Odds-Api-Key');
+    res.setHeader('Access-Control-Allow-Headers','Content-Type,X-Odds-Api-Key,X-Football-Api-Key');
     return res.status(204).end();
   }
 
